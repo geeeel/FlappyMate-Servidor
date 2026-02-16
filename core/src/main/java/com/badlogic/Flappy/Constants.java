@@ -17,4 +17,5 @@ public class Constants {
     public static final float TERMO_MAX_Y = 620f;
 
     public static final float GROUND_HEIGHT = 110f;
+
 }

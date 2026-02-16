@@ -8,6 +8,8 @@ import java.util.Random;
 
 final class GameSim {
 
+    private static final float TERMO_MIN_DISTANCE = 250f;
+
     // Lobby ready indexado por id (1..2). index 0 sin uso.
     final boolean[] ready = new boolean[3];
 
@@ -20,6 +22,8 @@ final class GameSim {
     // Valores razonables por defecto (se ajustan si su mate.png/termo.png difieren).
     private float mateW = 48f;
     private float mateH = 48f;
+    // Hitbox tuning (permisividad)
+    private float mateHitboxPad = 8f; // px que se recortan por lado (más grande = más permisivo)
     private float termoW = 80f;
 
     // Mates
@@ -39,8 +43,9 @@ final class GameSim {
     private boolean jumpP1 = false;
     private boolean jumpP2 = false;
 
-    // X fijo del mate (en su cliente es 120)
-    private static final float MATE_X = 120f;
+    private static final float P1_X = 120f;
+    private static final float P2_X = 160f; // o 180f si quiere más separación
+
 
     void resetForNewMatch() {
         termos.clear();
@@ -54,8 +59,10 @@ final class GameSim {
 
         // Reset mates al centro
         float startY = Constants.VIRTUAL_HEIGHT / 2f;
-        p1 = new MateSim(MATE_X, startY, mateW, mateH);
-        p2 = new MateSim(MATE_X, startY, mateW, mateH);
+        p1 = new MateSim(P1_X, startY, mateW, mateH, mateHitboxPad);
+        p2 = new MateSim(P2_X, startY, mateW, mateH, mateHitboxPad);
+
+
 
         jumpP1 = false;
         jumpP2 = false;
@@ -105,8 +112,9 @@ final class GameSim {
             t.update(dt);
 
             // Score por jugador, solo si vivo
-            if (p1Alive && t.tryScore(1, MATE_X, termoW)) score1++;
-            if (p2Alive && t.tryScore(2, MATE_X, termoW)) score2++;
+            if (p1Alive && t.tryScore(1, p1.x(), termoW)) score1++;
+            if (p2Alive && t.tryScore(2, p2.x(), termoW)) score2++;
+
 
             if (t.isOffscreen(termoW)) termos.remove(i);
         }
@@ -139,10 +147,27 @@ final class GameSim {
     }
 
     private void spawnTermo() {
-        float gapY = Constants.TERMO_MIN_Y + rng.nextFloat() * (Constants.TERMO_MAX_Y - Constants.TERMO_MIN_Y);
-        float startX = Constants.VIRTUAL_WIDTH + 40f;
+        float halfGap = Constants.TERMO_GAP / 2f;
+        float margin = 10f;
+
+        float minCenter = Constants.GROUND_HEIGHT + halfGap + margin;
+        float maxCenter = Constants.VIRTUAL_HEIGHT - halfGap - margin;
+
+        float gapY = minCenter + rng.nextFloat() * (maxCenter - minCenter);
+
+        float startX;
+
+        if (termos.isEmpty()) {
+            startX = Constants.VIRTUAL_WIDTH + 40f;
+        } else {
+            TermoSim last = termos.get(termos.size() - 1);
+            startX = last.x + TERMO_MIN_DISTANCE;
+        }
+
         termos.add(new TermoSim(startX, gapY, termoW));
     }
+
+
 
     String buildState(int tick) {
         // STATE;tick=10;P1=y,vy,alive,score;P2=y,vy,alive,score;T=x,gap|x,gap|...;

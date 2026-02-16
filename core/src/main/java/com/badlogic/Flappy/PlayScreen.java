@@ -169,6 +169,8 @@ public class PlayScreen implements Screen {
         // Fondo
         batch.draw(bg, 0, 0, Constants.VIRTUAL_WIDTH, Constants.VIRTUAL_HEIGHT);
 
+
+
         // Termos
         for (TermoPair t : termos) t.draw(batch);
 
