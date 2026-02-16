@@ -141,6 +141,13 @@ public final class HiloServidorFlappy extends Thread {
         }
 
         if (msg.startsWith(PREFIX_INPUT)) {
+            LoggerRed.info("INPUT", "De P" + c.id + " msg=" + msg + " partidaActiva=" + partidaActiva + " alive=" + sim.isAlive(c.id));
+            manejarInput(c, msg);
+            return;
+        }
+
+
+        if (msg.startsWith(PREFIX_INPUT)) {
             manejarInput(c, msg);
             return;
         }
