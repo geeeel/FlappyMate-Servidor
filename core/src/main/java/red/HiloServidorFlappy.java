@@ -100,6 +100,9 @@ public final class HiloServidorFlappy extends Thread {
     private void procesarPaquete(DatagramPacket p) {
         String msg = new String(p.getData(), 0, p.getLength(), StandardCharsets.UTF_8).trim();
 
+        // DEBUG: log de TODO lo que llega (temporal)
+        LoggerRed.info("RECV", "De " + p.getAddress().getHostAddress() + ":" + p.getPort() + " msg=" + msg);
+
         // 1) Handshake discovery
         if (MSG_HANDSHAKE_IN.equals(msg)) {
             enviar(MSG_HANDSHAKE_OUT, p.getAddress(), p.getPort());
